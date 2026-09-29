@@ -22,7 +22,7 @@ body {
   background: linear-gradient(180deg, #f8fafc 0%, #eef8ff 100%);
 }
 
-button, textarea {
+button, textarea, a {
   font: inherit;
 }
 
@@ -35,7 +35,7 @@ button, textarea {
 }
 
 .panel {
-  width: min(100%, 720px);
+  width: min(100%, 760px);
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid #dbeafe;
   border-radius: 24px;
@@ -83,26 +83,83 @@ button {
   cursor: pointer;
 }
 
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-top: 24px;
+.section-block {
+  margin-top: 28px;
 }
 
-.skill-card {
+.section-block h2 {
+  margin: 0 0 12px;
+  font-size: 1.2rem;
+}
+
+.skills-grid, .services-grid, .opportunities-list {
+  display: grid;
+  gap: 16px;
+}
+
+.skills-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.services-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.skill-card, .service-card, .opportunity-card, .profile-card {
   padding: 16px;
   border-radius: 18px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
 }
 
-.skill-card h2 {
-  margin: 0 0 8px;
-  font-size: 1.05rem;
+.skill-card h3 { margin: 0 0 8px; }
+.skill-card p, .service-card p, .profile-card p, .opportunity-card span { margin: 0; color: #475569; }
+
+.service-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-weight: 700;
 }
 
-.skill-card p {
-  margin: 0;
-  color: #475569;
+.profile-card {
+  margin-top: 28px;
+  background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+}
+
+.mini-label {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+.profile-card h2 {
+  margin: 0 0 12px;
+}
+
+.profile-card ul {
+  margin: 16px 0 0;
+  padding-left: 18px;
+  color: #334155;
+}
+
+.opportunity-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.opportunity-card strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 640px) {
+  .panel { padding: 18px; }
+  .app-shell { padding: 14px; }
+  .service-topline { flex-direction: column; }
 }
