@@ -90,6 +90,7 @@ function App() {
   const [friendlyMessage, setFriendlyMessage] = useState('');
   const [followUpQuestion, setFollowUpQuestion] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [resultVersion, setResultVersion] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem('stand-profile');
@@ -120,6 +121,7 @@ function App() {
     setBio(payload.bio || defaultBio);
     setFriendlyMessage(payload.friendlyMessage || '');
     setFollowUpQuestion(payload.followUpQuestion || null);
+    setResultVersion((version) => version + 1);
   };
 
   const generateFromPrompt = async (text: string) => {
@@ -213,11 +215,21 @@ function App() {
           {friendlyMessage && <p className="status-message">{friendlyMessage}</p>}
         </form>
 
+        {isLoading && (
+          <div className="loading-state" role="status" aria-live="polite">
+            <span className="loading-orbit" aria-hidden="true" />
+            <div>
+              <strong>Shaping your profile</strong>
+              <p>Taking a moment to turn your work into clear services.</p>
+            </div>
+          </div>
+        )}
+
         <div className="section-block">
           <h2>Suggested skills</h2>
           <div className="skills-grid">
             {skills.map((skill) => (
-              <article key={skill.id} className="skill-card">
+              <article key={`${resultVersion}-${skill.id}`} className="skill-card result-card">
                 <h3>{skill.label}</h3>
                 <p>{skill.description}</p>
               </article>
@@ -229,35 +241,37 @@ function App() {
           <h2>Service packages</h2>
           <div className="services-grid">
             {services.map((service) => (
-              <article key={service.id} className="service-card">
+              <article key={`${resultVersion}-${service.id}`} className="service-card result-card">
                 <div className="service-topline">
                   <span>{service.name}</span>
                   <strong>{service.price}</strong>
                 </div>
                 <p>{service.details}</p>
+                <p className="price-note">Suggested starting price · adjust to fit the work</p>
               </article>
             ))}
           </div>
         </div>
 
-        <div className="profile-card">
+        <section key={resultVersion} className="profile-card result-card" aria-labelledby="value-profile-title">
           <div>
             <p className="mini-label">Value profile</p>
-            <h2>A creative freelancer ready to get hired</h2>
+            <h2 id="value-profile-title">A clear offer, built from what you already do</h2>
           </div>
           <p>{bio}</p>
-          <ul>
+          <div className="profile-skills" aria-label="Your skills">
             {skills.map((skill) => (
-              <li key={skill.id}>{skill.label}</li>
+              <span key={`${resultVersion}-${skill.id}`}>{skill.label}</span>
             ))}
-          </ul>
-        </div>
+          </div>
+          <p className="profile-note">Use this as a starting point. Make sure the wording and prices feel right for your experience.</p>
+        </section>
 
         <div className="section-block">
           <h2>Opportunities for you</h2>
           <div className="opportunities-list">
             {opportunities.map((opportunity) => (
-              <a key={opportunity.id} href={opportunity.link} className="opportunity-card">
+              <a key={`${resultVersion}-${opportunity.id}`} href={opportunity.link} className="opportunity-card result-card">
                 <strong>{opportunity.title}</strong>
                 <span>{opportunity.reason}</span>
               </a>
