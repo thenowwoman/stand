@@ -56,10 +56,10 @@ Build mode: learn
 
 ## Final Review
 
-- [ ] Flipped interaction: vague input and optional question-start button lead to 2–3 one-at-a-time AI questions, answers persist and join the original prompt, and AI question failures skip to the existing fallback; mobile and reduced-motion behavior are checked
+- [x] Flipped interaction: vague input and optional question-start button lead to 2–3 one-at-a-time AI questions, answers persist and join the original prompt, and AI question failures skip to the existing fallback; mobile and reduced-motion behavior are checked
 - [x] Light/dark theme: system preference is respected by default, the accessible toggle changes theme and persists it in localStorage, both color schemes retain readable contrast, and the mobile layout is checked
 - [x] Requested UI refinements: soothing loading state, result-card entrance animation, button feedback, and clearer Value Profile — build passes and changes are explored in the browser
-- [ ] Final review complete — learner confirms the flipped interaction is ready after browser and mobile review
+- [x] Final review complete — learner confirmed the theme and flipped interaction work
 
 ## Code Tour and App Map
 
@@ -80,3 +80,4 @@ Activity mode: learn
 - The learner confirmed the theme works and looks good in both modes; final review is complete.
 - Added a final-review item and updated the PRD/spec for the requested flipped interaction; it preserves the existing profile journey and fallback while clarifying only short/vague input.
 - The build passed; mocked service checks verified sequential questioning and fallback, and one live local request returned an AI-generated follow-up question. Learner browser review was skipped, so mobile/interaction review remains open.
+- The learner confirmed the theme and flipped interaction work; final browser review is complete.
