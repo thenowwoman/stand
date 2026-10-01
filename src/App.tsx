@@ -29,6 +29,8 @@ type SavedState = {
   friendlyMessage: string;
 };
 
+type ThemeChoice = 'system' | 'light' | 'dark';
+
 const samplePrompt = 'I design flyers and run social media for a church and small businesses.';
 
 const defaultBio = 'I help small businesses and community groups look more polished online through clear visual content, social media support, and simple content systems.';
@@ -82,6 +84,13 @@ const buildFallbackData = (text: string) => {
 };
 
 function App() {
+  const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() => {
+    const savedTheme = localStorage.getItem('stand-theme');
+    return savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'system';
+  });
+  const [systemPrefersDark, setSystemPrefersDark] = useState(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
   const [input, setInput] = useState(samplePrompt);
   const [skills, setSkills] = useState<Skill[]>(defaultSkills);
   const [services, setServices] = useState<Service[]>(defaultServices);
@@ -91,6 +100,25 @@ function App() {
   const [followUpQuestion, setFollowUpQuestion] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [resultVersion, setResultVersion] = useState(0);
+  const effectiveTheme = themeChoice === 'system'
+    ? (systemPrefersDark ? 'dark' : 'light')
+    : themeChoice;
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateSystemPreference = (event: MediaQueryListEvent) => setSystemPrefersDark(event.matches);
+    mediaQuery.addEventListener('change', updateSystemPreference);
+    return () => mediaQuery.removeEventListener('change', updateSystemPreference);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = effectiveTheme;
+    if (themeChoice === 'system') {
+      localStorage.removeItem('stand-theme');
+    } else {
+      localStorage.setItem('stand-theme', themeChoice);
+    }
+  }, [effectiveTheme, themeChoice]);
 
   useEffect(() => {
     const saved = localStorage.getItem('stand-profile');
@@ -196,7 +224,18 @@ function App() {
   return (
     <main className="app-shell">
       <section className="panel">
-        <p className="eyebrow">Stand</p>
+        <div className="panel-header">
+          <p className="eyebrow">Stand</p>
+          <button
+            type="button"
+            className="theme-toggle"
+            aria-label={`Switch to ${effectiveTheme === 'dark' ? 'light' : 'dark'} theme`}
+            onClick={() => setThemeChoice(effectiveTheme === 'dark' ? 'light' : 'dark')}
+          >
+            <span aria-hidden="true">{effectiveTheme === 'dark' ? '☀' : '☾'}</span>
+            <span>{effectiveTheme === 'dark' ? 'Light' : 'Dark'} theme</span>
+          </button>
+        </div>
         <h1>What do you do that people already ask you for help with?</h1>
 
         <form onSubmit={handleSubmit} className="prompt-form">

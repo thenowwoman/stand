@@ -56,8 +56,9 @@ Build mode: learn
 
 ## Final Review
 
+- [x] Light/dark theme: system preference is respected by default, the accessible toggle changes theme and persists it in localStorage, both color schemes retain readable contrast, and the mobile layout is checked
 - [x] Requested UI refinements: soothing loading state, result-card entrance animation, button feedback, and clearer Value Profile — build passes and changes are explored in the browser
-- [x] Final review complete — learner confirmed the mobile Value Profile spacing and requested commit and push
+- [x] Final review complete — learner confirmed the light/dark theme works and looks good
 
 ## Code Tour and App Map
 
@@ -74,3 +75,5 @@ Activity mode: learn
 ## Revisions
 - Updated the plan to reflect the working MVP shape actually built: a single-page profile builder with prompt-to-skill generation, storage persistence, service pricing suggestions, and opportunity cards. The original plan remained valid; implementation simply filled the same kernel with more realistic output.
 - The learner confirmed the loading state and card fade-in work smoothly, and requested more spacing in the Value Profile on mobile. Increased its mobile padding and separation without changing desktop layout.
+- Added a final-review item for the requested light/dark theme so system preference, explicit selection, persistence, contrast, and mobile layout are checked together.
+- The learner confirmed the theme works and looks good in both modes; final review is complete.
