@@ -16,16 +16,16 @@ This shape is chosen because it proves the product idea quickly without adding a
 PRD ref: `prd.md > The Core Journey`.
 
 1. The user opens the app and sees a welcome screen with one prompt and sample text ideas.
-2. They type a short description of their skills or business help.
-3. The frontend sends that text to a serverless API or small backend endpoint.
-4. The API calls a lightweight model with a prompt designed to extract: likely skills, service offerings, a professional bio, and relevant opportunity categories.
-5. The frontend receives structured output and shows editable cards for the person’s skills.
-6. The user reviews and edits the skill cards.
-7. The app turns those skills into 2–3 service packages with price suggestions in naira.
-8. The user reviews and edits the package list.
+2. They type a short description of their skills or business help, or choose “Not sure what to write? Ask me questions.”
+3. If the input is short or vague, the frontend sends the original description and any earlier answers to the follow-up endpoint.
+4. The endpoint calls the model for one concise, warm question at a time. The user answers in a separate field; the app asks two questions and may ask a third if useful.
+5. The frontend combines the original description and answers and sends them to the profile endpoint. If follow-up generation fails, the client skips the questions and uses the existing keyword-based fallback.
+6. The profile endpoint returns likely skills, service offerings, and a professional bio.
+7. The frontend receives structured output and shows cards for the person’s skills.
+8. The user reviews the skill cards and generated service packages with suggested naira prices.
 9. The app creates a one-page profile preview and shows an opportunity list with explanation text.
 10. The user can screenshot or share the profile, or click through to a suggested opportunity.
-11. The app persists the current session in browser memory/local storage so the user can return without sign-up.
+11. The app persists the profile and any in-progress follow-up answers in browser localStorage so the user can return without sign-up.
 
 ## Stack
 - Frontend: React + Vite + TypeScript
@@ -101,6 +101,7 @@ The app keeps data intentionally small and session-scoped. There is no persisten
 
 Core state shape:
 - `promptText` — the original user input
+- `followUpAnswers[]` and `currentFollowUpQuestion` — in-progress clarification conversation, if needed
 - `skills[]` — array of skill objects with id, label, and description
 - `services[]` — array of service objects with name, description, and priceRange
 - `profile` — generated profile data: name, bio, services, skill summary, proof items
@@ -113,6 +114,7 @@ Where it lives:
 
 How it updates:
 - User writes input → state update
+- Vague input → ask and save one follow-up answer at a time; combine answers with the original prompt before generation
 - AI response arrives → state gets filled with structure
 - User edits cards/packages → local state is changed instantly
 - User leaves and returns → app reads the persisted session and restores the profile state
@@ -189,4 +191,3 @@ These simplifications preserve the kernel: the user takes a vague set of skills 
 - Tradeoff accepted: the app may feel less “full production” because it is intentionally narrow and session-scoped.
 - One genuine ambiguity discussed: the exact AI implementation path for the generation step. We agreed to use a small server-side model call with a fallback to sample data, while keeping the frontend free from any key exposure. This is the main technical decision to verify in the build.
 - Remaining open question: the exact provider and deploy target should be confirmed once the learner chooses the easiest setup path. This does not block the build itself, because the fallback keeps the core flow functional.
-

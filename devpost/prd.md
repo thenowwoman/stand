@@ -11,13 +11,14 @@ Source: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`, `scope.md > 
 ## The Core Journey
 1. A user opens the app on a phone and sees a warm welcome screen with a single prompt asking what work they already do.
 2. They enter a short natural-language description of their skills or work in their own words, such as “I design flyers and run social media for small businesses.”
-3. The app interprets the description and creates a set of suggested skill cards, such as Graphic Design, Content Creation, or Community Management.
-4. The user reviews and edits those skill cards, removing anything inaccurate or adding missing abilities.
-5. The app generates 2–3 simple service packages with suggested starting prices in naira and short descriptions of what’s included.
-6. The user reviews and edits the packages, then sees a one-page professional profile summarizing their name, bio, services, pricing, and proof of work.
-7. The app suggests opportunities, such as training programs, grant programs, or suitable client types, each with a short explanation of why it matches them.
-8. The user can screenshot or share the profile and click through to relevant opportunites.
-9. Success is that the user ends with something they can send to a client or use to apply for relevant support.
+3. If the description is very short or vague, Stand asks two or three brief follow-up questions one at a time; users can also choose “Not sure what to write? Ask me questions.” Their answers are combined with their original description.
+4. The app interprets the resulting description and creates suggested skill cards, such as Graphic Design, Content Creation, or Community Management.
+5. The user reviews and edits those skill cards, removing anything inaccurate or adding missing abilities.
+6. The app generates 2–3 simple service packages with suggested starting prices in naira and short descriptions of what’s included.
+7. The user reviews and edits the packages, then sees a one-page professional profile summarizing their name, bio, services, pricing, and proof of work.
+8. The app suggests opportunities, such as training programs, grant programs, or suitable client types, each with a short explanation of why it matches them.
+9. The user can screenshot or share the profile and click through to relevant opportunities.
+10. Success is that the user ends with something they can send to a client or use to apply for relevant support.
 
 ## Screens and Layout
 The product is a simple mobile-first flow with a small number of screens or panels:
@@ -63,6 +64,9 @@ The user enters short natural language describing what they do. The app extracts
 
 - As a young creative, I want the app to understand my real work in plain language so that I can turn it into a real service.
   - [ ] The user can type or paste a short description without needing technical knowledge.
+  - [ ] Very short or vague descriptions can be clarified through 2–3 warm, plain-language follow-up questions asked one at a time.
+  - [ ] A user can optionally start that question flow with “Not sure what to write? Ask me questions.”
+  - [ ] Answers are combined with the original description before profile generation; if question generation fails, the existing fallback is used without asking more questions.
   - [ ] The app generates 3–5 skill cards that match the description.
   - [ ] The user can edit, remove, or add skills before continuing.
 
@@ -93,6 +97,7 @@ The app suggests relevant grants, programs, and client opportunities that fit th
 ## States and Boundaries
 - **First use** — The user sees a prompt screen and a light example list instead of a blank form.
 - **Empty or vague input** — The app should encourage the user to add more detail rather than produce nonsense.
+- **Follow-up flow** — The original description and answered questions remain available if the page is refreshed; the user can continue one question at a time.
 - **Skill review state** — The user can remove irrelevant suggestions and continue only once they are satisfied.
 - **Pricing review state** — The user can adjust suggested prices and packages before generating the profile.
 - **Shared profile state** — The resulting profile is shareable and designed to be screenshot or link-based.

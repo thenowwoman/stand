@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import { getFollowUp } from './follow-up.js';
 
 dotenv.config();
 
@@ -7,6 +8,19 @@ const app = express();
 const port = Number(process.env.PORT || 3001);
 
 app.use(express.json({ limit: '1mb' }));
+
+app.post('/api/follow-up', async (req, res) => {
+  const description = String(req.body?.description || '').trim().slice(0, 2000);
+  const answers = Array.isArray(req.body?.answers)
+    ? req.body.answers.slice(0, 3).map((answer) => ({
+      question: String(answer?.question || '').slice(0, 300),
+      answer: String(answer?.answer || '').trim().slice(0, 1000),
+    }))
+    : [];
+
+  const result = await getFollowUp(description, answers);
+  return res.status(200).json(result);
+});
 
 const normalizeSkills = (skills) => {
   if (!Array.isArray(skills)) return [];

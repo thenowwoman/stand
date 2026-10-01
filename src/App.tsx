@@ -27,9 +27,17 @@ type SavedState = {
   opportunities: Opportunity[];
   bio: string;
   friendlyMessage: string;
+  followUpAnswers?: FollowUpAnswer[];
+  currentFollowUpQuestion?: string | null;
+  interactionActive?: boolean;
 };
 
 type ThemeChoice = 'system' | 'light' | 'dark';
+
+type FollowUpAnswer = {
+  question: string;
+  answer: string;
+};
 
 const samplePrompt = 'I design flyers and run social media for a church and small businesses.';
 
@@ -100,6 +108,10 @@ function App() {
   const [followUpQuestion, setFollowUpQuestion] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [resultVersion, setResultVersion] = useState(0);
+  const [followUpAnswers, setFollowUpAnswers] = useState<FollowUpAnswer[]>([]);
+  const [currentFollowUpQuestion, setCurrentFollowUpQuestion] = useState<string | null>(null);
+  const [interactionActive, setInteractionActive] = useState(false);
+  const [followUpAnswer, setFollowUpAnswer] = useState('');
   const effectiveTheme = themeChoice === 'system'
     ? (systemPrefersDark ? 'dark' : 'light')
     : themeChoice;
@@ -132,15 +144,28 @@ function App() {
       if (parsed.opportunities?.length) setOpportunities(parsed.opportunities);
       if (parsed.bio) setBio(parsed.bio);
       if (parsed.friendlyMessage) setFriendlyMessage(parsed.friendlyMessage);
+      if (Array.isArray(parsed.followUpAnswers)) setFollowUpAnswers(parsed.followUpAnswers);
+      if (parsed.currentFollowUpQuestion) setCurrentFollowUpQuestion(parsed.currentFollowUpQuestion);
+      if (parsed.interactionActive) setInteractionActive(true);
     } catch {
       // ignore invalid saved state
     }
   }, []);
 
   useEffect(() => {
-    const state: SavedState = { input, skills, services, opportunities, bio, friendlyMessage };
+    const state: SavedState = {
+      input,
+      skills,
+      services,
+      opportunities,
+      bio,
+      friendlyMessage,
+      followUpAnswers,
+      currentFollowUpQuestion,
+      interactionActive,
+    };
     localStorage.setItem('stand-profile', JSON.stringify(state));
-  }, [input, skills, services, opportunities, bio, friendlyMessage]);
+  }, [input, skills, services, opportunities, bio, friendlyMessage, followUpAnswers, currentFollowUpQuestion, interactionActive]);
 
   const applyGeneratedProfile = (payload: Partial<SavedState> & { bio?: string; friendlyMessage?: string; followUpQuestion?: string | null }) => {
     setSkills(payload.skills?.length ? payload.skills : defaultSkills);
@@ -152,16 +177,24 @@ function App() {
     setResultVersion((version) => version + 1);
   };
 
-  const generateFromPrompt = async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
+  const combinedDescription = (text: string, answers: FollowUpAnswer[]) => {
+    const details = answers
+      .filter((item) => item.answer.trim())
+      .map((item) => `Question: ${item.question}\nAnswer: ${item.answer.trim()}`)
+      .join('\n\n');
+    return details ? `${text.trim()}\n\nMore about my work:\n${details}`.trim() : text.trim();
+  };
 
-    if (trimmed.length < 15 || trimmed.split(/\s+/).length < 4) {
-      setFriendlyMessage('I need a bit more detail to build a stronger profile.');
-      setFollowUpQuestion('Can you tell me who you help and what kind of work you do for them?');
-      return;
-    }
+  const applyFallbackProfile = (text: string, message: string) => {
+    const fallback = buildFallbackData(text);
+    applyGeneratedProfile({ ...fallback, friendlyMessage: message });
+    setInteractionActive(false);
+    setCurrentFollowUpQuestion(null);
+    setFollowUpAnswers([]);
+    setFollowUpAnswer('');
+  };
 
+  const generateProfile = async (text: string) => {
     setIsLoading(true);
     setFriendlyMessage('');
     setFollowUpQuestion(null);
@@ -170,18 +203,16 @@ function App() {
       const response = await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: trimmed }),
+        body: JSON.stringify({ description: text }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        const fallback = buildFallbackData(trimmed);
-        applyGeneratedProfile({
-          ...fallback,
-          friendlyMessage: data.message || 'The AI service is temporarily unavailable, so I used the built-in fallback suggestions instead.',
-          followUpQuestion: data.followUpQuestion || null,
-        });
+        applyFallbackProfile(
+          text,
+          data.message || 'The AI service is temporarily unavailable, so I used the built-in fallback suggestions instead.'
+        );
         return;
       }
 
@@ -204,21 +235,102 @@ function App() {
 
       applyGeneratedProfile(payload);
     } catch {
-      const fallback = buildFallbackData(trimmed);
-      applyGeneratedProfile({
-        ...fallback,
-        friendlyMessage: 'The AI service is temporarily unavailable, so I used the built-in fallback suggestions instead.',
-      });
+      applyFallbackProfile(
+        text,
+        'The AI service is temporarily unavailable, so I used the built-in fallback suggestions instead.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
+  const requestFollowUp = async (text: string, answers: FollowUpAnswer[]) => {
+    setIsLoading(true);
+    setFriendlyMessage('');
+
+    try {
+      const response = await fetch('/api/follow-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: text, answers }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || data.source === 'fallback') {
+        applyFallbackProfile(
+          combinedDescription(text, answers),
+          data.message || 'I could not reach the question helper, so I used the built-in suggestions from what you wrote.'
+        );
+        return;
+      }
+
+      if (typeof data.question === 'string' && data.question.trim()) {
+        setFollowUpAnswers(answers);
+        setCurrentFollowUpQuestion(data.question.trim());
+        setFollowUpAnswer('');
+        setInteractionActive(true);
+        return;
+      }
+
+      setFollowUpAnswers(answers);
+      setCurrentFollowUpQuestion(null);
+      setInteractionActive(false);
+      setFollowUpAnswer('');
+    } catch {
+      applyFallbackProfile(
+        combinedDescription(text, answers),
+        'I could not reach the question helper, so I used the built-in suggestions from what you wrote.'
+      );
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+
+    await generateProfile(combinedDescription(text, answers));
+  };
+
+  const isShortOrVague = (text: string) => {
+    const normalized = text.toLowerCase().trim();
+    const wordCount = normalized.split(/\s+/).filter(Boolean).length;
+    const vaguePhrases = ['not sure', 'anything really', 'i do a bit of everything', 'i help people', 'i do stuff'];
+    return wordCount < 8 || normalized.length < 45 || vaguePhrases.some((phrase) => normalized.includes(phrase));
+  };
+
+  const startQuestionFlow = (text: string) => {
+    setFollowUpAnswers([]);
+    setFollowUpAnswer('');
+    setInteractionActive(false);
+    setCurrentFollowUpQuestion(null);
+    void requestFollowUp(text, []);
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isLoading) return;
+
+    if (interactionActive && currentFollowUpQuestion) {
+      const answer = followUpAnswer.trim();
+      if (!answer) {
+        setFriendlyMessage('Add a quick answer so I can ask the next helpful question.');
+        return;
+      }
+
+      const answers = [...followUpAnswers, { question: currentFollowUpQuestion, answer }];
+      setFollowUpAnswers(answers);
+      setCurrentFollowUpQuestion(null);
+      setFollowUpAnswer('');
+      setInteractionActive(false);
+      void requestFollowUp(input, answers);
+      return;
+    }
+
     const trimmed = input.trim();
     if (!trimmed) return;
-    void generateFromPrompt(trimmed);
+    if (isShortOrVague(trimmed)) {
+      startQuestionFlow(trimmed);
+      return;
+    }
+    void generateProfile(trimmed);
   };
 
   return (
@@ -242,10 +354,39 @@ function App() {
           <textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
+            disabled={interactionActive || isLoading}
             rows={5}
             placeholder="I design flyers and run social media for a church and small businesses..."
           />
-          <button type="submit" disabled={isLoading}>{isLoading ? 'Working...' : 'Show me my skills'}</button>
+          {interactionActive && currentFollowUpQuestion && (
+            <div className="follow-up-panel" aria-live="polite">
+              <p className="follow-up-progress">A little more about your work · question {followUpAnswers.length + 1}</p>
+              <label htmlFor="follow-up-answer">{currentFollowUpQuestion}</label>
+              <input
+                id="follow-up-answer"
+                value={followUpAnswer}
+                onChange={(event) => setFollowUpAnswer(event.target.value)}
+                disabled={isLoading}
+                autoComplete="off"
+                placeholder="Write a short answer..."
+              />
+            </div>
+          )}
+          <div className="prompt-actions">
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? 'Working...' : interactionActive ? 'Continue' : 'Show me my skills'}
+            </button>
+            {!interactionActive && (
+              <button
+                type="button"
+                className="question-start-button"
+                disabled={isLoading}
+                onClick={() => startQuestionFlow(input.trim())}
+              >
+                Not sure what to write? Ask me questions
+              </button>
+            )}
+          </div>
           {followUpQuestion && (
             <div className="inline-note">
               <strong>Quick follow-up:</strong> {followUpQuestion}

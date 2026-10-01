@@ -97,16 +97,16 @@
   <body>
     <div class="wrap">
       <h1>Stand App Map</h1>
-      <p class="muted">A compact reference for the current proof-of-concept: a mobile-first profile builder that turns a vague skill description into structured services and opportunity ideas.</p>
+      <p class="muted">A compact reference for the current proof-of-concept: a mobile-first profile builder that can clarify a vague description before turning it into structured services and opportunity ideas.</p>
 
       <section class="card">
         <h2>What the app does</h2>
-        <p>The app accepts a short text prompt, extracts likely skills, turns those into pricing-friendly service packages, and shows a client-ready profile plus a short opportunity list. It keeps the profile in <code>localStorage</code> so a user can return without an account.</p>
+        <p>The app accepts a short text prompt, asks up to three AI-generated follow-up questions one at a time when helpful, combines the answers with the original text, then shows likely skills, pricing-friendly service packages, a client-ready profile, and opportunity ideas. It keeps the profile and an in-progress question conversation in <code>localStorage</code> so a user can return without an account.</p>
 
         <div class="diagram" aria-label="Action flow diagram">
-          <div class="node">Prompt</div>
+          <div class="node">Prompt + answers</div>
           <div class="arrow">→</div>
-          <div class="node">Skill match</div>
+          <div class="node">Profile generation</div>
           <div class="arrow">→</div>
           <div class="node">Profile + offers</div>
         </div>
@@ -115,8 +115,9 @@
       <section class="card">
         <h2>Reference route</h2>
         <ol class="route">
-          <li><strong>Start here:</strong> <code>src/App.tsx</code> — the main app flow, prompt state, generated skill/service data, and persisted browser state.</li>
-          <li><strong>Core logic:</strong> <code>generateFromPrompt()</code> in <code>src/App.tsx</code> — turns the freeform description into structured outputs using keyword matching and seeded profile data.</li>
+          <li><strong>Start here:</strong> <code>src/App.tsx</code> — prompt state, follow-up answers, combining user details, and browser persistence.</li>
+          <li><strong>Question step:</strong> <code>requestFollowUp()</code> in <code>src/App.tsx</code> calls <code>/api/follow-up</code>; <code>server/follow-up.js</code> asks one question at a time and returns a fallback signal if the model fails.</li>
+          <li><strong>Profile output:</strong> <code>generateProfile()</code> in <code>src/App.tsx</code> sends the combined description to <code>/api/profile</code> and retains existing fallback behavior.</li>
           <li><strong>Visible output:</strong> <code>src/styles.css</code> — mobile-first cards, service package styling, and the profile/opportunity panels the user sees.</li>
         </ol>
       </section>
@@ -124,8 +125,8 @@
       <section class="card">
         <h2>To change this, start here</h2>
         <ul>
-          <li>Change the prompt behavior: edit the textarea and submit logic in <code>src/App.tsx</code>.</li>
-          <li>Change the generated skill/service suggestions: adjust the skill catalog and service list inside <code>generateFromPrompt()</code>.</li>
+          <li>Change question flow: edit <code>requestFollowUp()</code> in <code>src/App.tsx</code> or the question prompt in <code>server/follow-up.js</code>.</li>
+          <li>Change the generated skill/service fallback: adjust <code>buildFallbackData()</code> in <code>src/App.tsx</code>.</li>
           <li>Change the visual feel: update the card layout and spacing in <code>src/styles.css</code>.</li>
         </ul>
       </section>

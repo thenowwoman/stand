@@ -198,10 +198,9 @@ h1 {
   gap: 16px;
 }
 
-textarea {
+textarea,
+.follow-up-panel input {
   width: 100%;
-  min-height: 130px;
-  resize: vertical;
   border: 1px solid var(--field-border);
   border-radius: 18px;
   padding: 16px 18px;
@@ -209,7 +208,52 @@ textarea {
   color: var(--text);
 }
 
+textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
 textarea::placeholder { color: var(--subtle); }
+.follow-up-panel input { border-radius: 12px; }
+.follow-up-panel input::placeholder { color: var(--subtle); }
+
+.follow-up-panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  background: var(--card-bg);
+}
+
+.follow-up-panel label {
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.follow-up-progress {
+  margin: 0;
+  color: var(--subtle);
+  font-size: 0.8rem;
+}
+
+.prompt-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.question-start-button {
+  border: 1px solid var(--toggle-border);
+  background: var(--toggle-bg);
+  color: var(--toggle-text);
+  box-shadow: none;
+}
+
+.question-start-button:hover:not(:disabled) {
+  box-shadow: var(--button-shadow);
+  filter: none;
+}
 
 button {
   border: none;

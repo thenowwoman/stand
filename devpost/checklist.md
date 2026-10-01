@@ -56,9 +56,10 @@ Build mode: learn
 
 ## Final Review
 
+- [ ] Flipped interaction: vague input and optional question-start button lead to 2–3 one-at-a-time AI questions, answers persist and join the original prompt, and AI question failures skip to the existing fallback; mobile and reduced-motion behavior are checked
 - [x] Light/dark theme: system preference is respected by default, the accessible toggle changes theme and persists it in localStorage, both color schemes retain readable contrast, and the mobile layout is checked
 - [x] Requested UI refinements: soothing loading state, result-card entrance animation, button feedback, and clearer Value Profile — build passes and changes are explored in the browser
-- [x] Final review complete — learner confirmed the light/dark theme works and looks good
+- [ ] Final review complete — learner confirms the flipped interaction is ready after browser and mobile review
 
 ## Code Tour and App Map
 
@@ -67,7 +68,7 @@ Build mode: learn
 - [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
 Activity and evidence: Verified the end-to-end flow with a production build (`npm run build`) and a live browser check of the sample prompt, skill cards, service packages, and persisted localStorage state.
-Route and stops: `src/App.tsx` — prompt input, `generateFromPrompt()`, and persisted state; `src/styles.css` — mobile-first card layout and profile panel; `devpost/spec.md` — planned core journey and data model matching the working implementation.
+Route and stops: `src/App.tsx` — prompt input, `requestFollowUp()`, combined answers, and localStorage; `server/follow-up.js` — one-question-at-a-time model request and fallback; `generateProfile()` — final profile request.
 Edit outcome: Kept the small styling polish for the service section and profile summary to make the proof-of-concept feel more complete without changing the product boundary.
 Reflection: Offered and covered as a brief project-grounded recap: the key reusable practice is defining an observable result for a vague input and testing it with a real build and browser check.
 Activity mode: learn
@@ -77,3 +78,5 @@ Activity mode: learn
 - The learner confirmed the loading state and card fade-in work smoothly, and requested more spacing in the Value Profile on mobile. Increased its mobile padding and separation without changing desktop layout.
 - Added a final-review item for the requested light/dark theme so system preference, explicit selection, persistence, contrast, and mobile layout are checked together.
 - The learner confirmed the theme works and looks good in both modes; final review is complete.
+- Added a final-review item and updated the PRD/spec for the requested flipped interaction; it preserves the existing profile journey and fallback while clarifying only short/vague input.
+- The build passed; mocked service checks verified sequential questioning and fallback, and one live local request returned an AI-generated follow-up question. Learner browser review was skipped, so mobile/interaction review remains open.
