@@ -1,4 +1,38 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+
+type SpeechRecognitionAlternativeLike = { transcript: string };
+type SpeechRecognitionResultLike = {
+  isFinal: boolean;
+  [index: number]: SpeechRecognitionAlternativeLike;
+};
+type SpeechRecognitionResultsLike = {
+  length: number;
+  [index: number]: SpeechRecognitionResultLike;
+};
+type SpeechRecognitionEventLike = {
+  resultIndex: number;
+  results: SpeechRecognitionResultsLike;
+};
+type SpeechRecognitionErrorLike = { error: string };
+type BrowserSpeechRecognition = {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+};
+type SpeechRecognitionConstructor = new () => BrowserSpeechRecognition;
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  }
+}
 
 type Skill = {
   id: number;
@@ -112,6 +146,13 @@ function App() {
   const [currentFollowUpQuestion, setCurrentFollowUpQuestion] = useState<string | null>(null);
   const [interactionActive, setInteractionActive] = useState(false);
   const [followUpAnswer, setFollowUpAnswer] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const SpeechRecognition = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+  const supportsVoiceInput = Boolean(SpeechRecognition);
+  const supportsReadAloud = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   const effectiveTheme = themeChoice === 'system'
     ? (systemPrefersDark ? 'dark' : 'light')
     : themeChoice;
@@ -166,6 +207,110 @@ function App() {
     };
     localStorage.setItem('stand-profile', JSON.stringify(state));
   }, [input, skills, services, opportunities, bio, friendlyMessage, followUpAnswers, currentFollowUpQuestion, interactionActive]);
+
+  useEffect(() => () => {
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    if (recognition) {
+      recognition.onend = null;
+      recognition.onerror = null;
+      recognition.onresult = null;
+      recognition.abort();
+    }
+    if ('speechSynthesis' in window) {
+      if (utteranceRef.current) {
+        utteranceRef.current.onend = null;
+        utteranceRef.current.onerror = null;
+        utteranceRef.current = null;
+      }
+      window.speechSynthesis.cancel();
+    }
+  }, []);
+
+  const toggleVoiceInput = () => {
+    if (!SpeechRecognition) {
+      setFriendlyMessage('Voice typing is not available in this browser. You can still type your description.');
+      return;
+    }
+
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-NG';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.resultIndex]?.[0]?.transcript.trim();
+      if (transcript) {
+        setInput((current) => `${current.trimEnd()}${current.trim() ? ' ' : ''}${transcript}`);
+        setFriendlyMessage('Voice typing added your words. Review them before continuing.');
+      }
+    };
+    recognition.onerror = (event) => {
+      setIsListening(false);
+      recognitionRef.current = null;
+      setFriendlyMessage(event.error === 'not-allowed'
+        ? 'Microphone access was not allowed. You can still type your description.'
+        : 'Voice typing paused. You can try again or type your description.');
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+    };
+
+    try {
+      recognitionRef.current = recognition;
+      setFriendlyMessage('');
+      setIsListening(true);
+      recognition.start();
+    } catch {
+      recognitionRef.current = null;
+      setIsListening(false);
+      setFriendlyMessage('Voice typing could not start. You can still type your description.');
+    }
+  };
+
+  const toggleReadAloud = () => {
+    if (!supportsReadAloud) {
+      setFriendlyMessage('Read-aloud is not available in this browser. Your profile is still ready to read.');
+      return;
+    }
+
+    if (isSpeaking) {
+      if (utteranceRef.current) {
+        utteranceRef.current.onend = null;
+        utteranceRef.current.onerror = null;
+        utteranceRef.current = null;
+      }
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(bio);
+    utterance.lang = 'en-NG';
+    utterance.rate = 0.92;
+    utterance.pitch = 1.04;
+    utterance.onend = () => {
+      if (utteranceRef.current !== utterance) return;
+      utteranceRef.current = null;
+      setIsSpeaking(false);
+    };
+    utterance.onerror = () => {
+      if (utteranceRef.current !== utterance) return;
+      utteranceRef.current = null;
+      setIsSpeaking(false);
+      setFriendlyMessage('Read-aloud stopped. Your profile text is still available above.');
+    };
+    setFriendlyMessage('');
+    setIsSpeaking(true);
+    utteranceRef.current = utterance;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  };
 
   const applyGeneratedProfile = (payload: Partial<SavedState> & { bio?: string; friendlyMessage?: string; followUpQuestion?: string | null }) => {
     setSkills(payload.skills?.length ? payload.skills : defaultSkills);
@@ -348,7 +493,21 @@ function App() {
             <span>{effectiveTheme === 'dark' ? 'Light' : 'Dark'} theme</span>
           </button>
         </div>
-        <h1>What do you do that people already ask you for help with?</h1>
+        <section className="welcome-opening" aria-labelledby="welcome-title">
+          <div className="welcome-copy">
+            <p className="code-whisper"><span aria-hidden="true">&lt;</span>stand.exe<span aria-hidden="true"> /&gt;</span> <span className="code-prompt">// your next step</span></p>
+            <h1 id="welcome-title">Your skills already have <span>value.</span></h1>
+            <p className="welcome-subtitle">Let’s give the work you already do a voice, a shape, and a fair starting point.</p>
+          </div>
+          <div className="journey-map" aria-label="Your work becomes skills, then services">
+            <div className="journey-step"><code>01</code><span>Your work</span></div>
+            <span className="journey-arrow" aria-hidden="true">→</span>
+            <div className="journey-step"><code>02</code><span>Your skills</span></div>
+            <span className="journey-arrow" aria-hidden="true">→</span>
+            <div className="journey-step"><code>03</code><span>Your offer</span></div>
+          </div>
+        </section>
+        <h2 className="prompt-heading">What do you do that people already ask you for help with?</h2>
 
         <form onSubmit={handleSubmit} className="prompt-form">
           <textarea
@@ -358,6 +517,21 @@ function App() {
             rows={5}
             placeholder="I design flyers and run social media for a church and small businesses..."
           />
+          {!interactionActive && (
+            <button
+              type="button"
+              className="voice-button"
+              disabled={isLoading || !supportsVoiceInput}
+              aria-pressed={isListening}
+              onClick={toggleVoiceInput}
+            >
+              <span aria-hidden="true">{isListening ? '■' : '◉'}</span>
+              {isListening ? 'Stop voice typing' : supportsVoiceInput ? 'Speak your description' : 'Voice typing unavailable'}
+            </button>
+          )}
+          {!interactionActive && !supportsVoiceInput && (
+            <p className="voice-note">This browser does not support voice typing. You can still type your description.</p>
+          )}
           {interactionActive && currentFollowUpQuestion && (
             <div className="follow-up-panel" aria-live="polite">
               <p className="follow-up-progress">A little more about your work · question {followUpAnswers.length + 1}</p>
@@ -439,6 +613,17 @@ function App() {
             <h2 id="value-profile-title">A clear offer, built from what you already do</h2>
           </div>
           <p>{bio}</p>
+          <button
+            type="button"
+            className="voice-button read-aloud-button"
+            disabled={!supportsReadAloud}
+            aria-pressed={isSpeaking}
+            onClick={toggleReadAloud}
+          >
+            <span aria-hidden="true">{isSpeaking ? '■' : '♫'}</span>
+            {isSpeaking ? 'Stop reading' : supportsReadAloud ? 'Read my profile aloud' : 'Read-aloud unavailable'}
+          </button>
+          {!supportsReadAloud && <p className="voice-note">Read-aloud is not supported in this browser; your profile text is still available above.</p>}
           <div className="profile-skills" aria-label="Your skills">
             {skills.map((skill) => (
               <span key={`${resultVersion}-${skill.id}`}>{skill.label}</span>

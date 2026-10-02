@@ -10,7 +10,7 @@ Source: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`, `scope.md > 
 
 ## The Core Journey
 1. A user opens the app on a phone and sees a warm welcome screen with a single prompt asking what work they already do.
-2. They enter a short natural-language description of their skills or work in their own words, such as “I design flyers and run social media for small businesses.”
+2. They enter a short natural-language description of their skills or work in their own words, such as “I design flyers and run social media for small businesses.” Where supported, they may dictate the description or ask the browser to read their finished bio aloud.
 3. If the description is very short or vague, Stand asks two or three brief follow-up questions one at a time; users can also choose “Not sure what to write? Ask me questions.” Their answers are combined with their original description.
 4. The app interprets the resulting description and creates suggested skill cards, such as Graphic Design, Content Creation, or Community Management.
 5. The user reviews and edits those skill cards, removing anything inaccurate or adding missing abilities.
@@ -24,8 +24,10 @@ Source: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`, `scope.md > 
 The product is a simple mobile-first flow with a small number of screens or panels:
 
 1. Welcome / Prompt Screen
+   - Warm, code-inspired opening with a simple visual of work becoming skills and offers
    - Large headline and a single text input
    - Optional example prompts below the input
+   - Optional voice typing control when supported by the browser
    - One primary action: “Show me my skills”
 
 2. Skills Review Screen
@@ -43,6 +45,7 @@ The product is a simple mobile-first flow with a small number of screens or pane
 4. Value Profile Screen
    - One-page layout summarizing the founder’s identity and offers
    - Includes name, short bio, skills, services, pricing, and sample link or proof items
+   - Optional read-aloud control for the bio when supported by the browser
    - User can copy, screenshot, or share
 
 5. Opportunities Screen
@@ -94,6 +97,12 @@ The app suggests relevant grants, programs, and client opportunities that fit th
   - [ ] Each opportunity includes a brief explanation of why it matches the user.
   - [ ] The user can click through to the opportunity or relevant link.
 
+### Optional Voice Controls
+- A user can explicitly start and stop browser-supported voice typing for the main description; dictated words are added to the editable field and are not submitted automatically.
+- A user can explicitly start and stop browser-supported read-aloud for the generated bio.
+- Voice is optional. Unsupported browsers show an inline explanation; microphone denial or speech errors leave the existing typed and visual profile flow available with a friendly status message.
+- Neither voice control sends audio to Stand's API or changes profile persistence.
+
 ## States and Boundaries
 - **First use** — The user sees a prompt screen and a light example list instead of a blank form.
 - **Empty or vague input** — The app should encourage the user to add more detail rather than produce nonsense.
@@ -102,6 +111,7 @@ The app suggests relevant grants, programs, and client opportunities that fit th
 - **Pricing review state** — The user can adjust suggested prices and packages before generating the profile.
 - **Shared profile state** — The resulting profile is shareable and designed to be screenshot or link-based.
 - **No-account state** — The app does not require sign-up or login for the demo flow.
+- **Voice unavailable** — Typed input and the visible profile remain usable when browser speech features are absent or denied, with an inline explanation.
 
 ## Product Decisions
 - The user should type in freeform natural language rather than choose rigid categories — this keeps the experience aligned with how people actually describe their work.

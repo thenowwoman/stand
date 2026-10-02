@@ -97,11 +97,11 @@
   <body>
     <div class="wrap">
       <h1>Stand App Map</h1>
-      <p class="muted">A compact reference for the current proof-of-concept: a mobile-first profile builder that can clarify a vague description before turning it into structured services and opportunity ideas.</p>
+      <p class="muted">A compact reference for the current proof-of-concept: a mobile-first profile builder that can clarify a vague description before turning it into structured services and opportunity ideas, with optional browser voice controls.</p>
 
       <section class="card">
         <h2>What the app does</h2>
-        <p>The app accepts a short text prompt, asks up to three AI-generated follow-up questions one at a time when helpful, combines the answers with the original text, then shows likely skills, pricing-friendly service packages, a client-ready profile, and opportunity ideas. It keeps the profile and an in-progress question conversation in <code>localStorage</code> so a user can return without an account.</p>
+        <p>The app accepts a short text prompt, optionally lets the user dictate it, asks up to three AI-generated follow-up questions one at a time when helpful, combines the answers with the original text, then shows likely skills, pricing-friendly service packages, a client-ready profile, and opportunity ideas. The generated bio can be read aloud on request. Speech stays in the browser; it is not sent to the server. The app keeps the profile and an in-progress question conversation in <code>localStorage</code> so a user can return without an account.</p>
 
         <div class="diagram" aria-label="Action flow diagram">
           <div class="node">Prompt + answers</div>
@@ -118,6 +118,7 @@
           <li><strong>Start here:</strong> <code>src/App.tsx</code> — prompt state, follow-up answers, combining user details, and browser persistence.</li>
           <li><strong>Question step:</strong> <code>requestFollowUp()</code> in <code>src/App.tsx</code> calls <code>/api/follow-up</code>; <code>server/follow-up.js</code> asks one question at a time and returns a fallback signal if the model fails.</li>
           <li><strong>Profile output:</strong> <code>generateProfile()</code> in <code>src/App.tsx</code> sends the combined description to <code>/api/profile</code> and retains existing fallback behavior.</li>
+          <li><strong>Voice controls:</strong> <code>toggleVoiceInput()</code> and <code>toggleReadAloud()</code> in <code>src/App.tsx</code> use optional browser speech APIs; unsupported browsers retain the typed flow.</li>
           <li><strong>Visible output:</strong> <code>src/styles.css</code> — mobile-first cards, service package styling, and the profile/opportunity panels the user sees.</li>
         </ol>
       </section>
@@ -128,6 +129,7 @@
           <li>Change question flow: edit <code>requestFollowUp()</code> in <code>src/App.tsx</code> or the question prompt in <code>server/follow-up.js</code>.</li>
           <li>Change the generated skill/service fallback: adjust <code>buildFallbackData()</code> in <code>src/App.tsx</code>.</li>
           <li>Change the visual feel: update the card layout and spacing in <code>src/styles.css</code>.</li>
+          <li>Change the code-inspired welcome and responsive flow diagram: update <code>.welcome-opening</code> and <code>.journey-map</code> in <code>src/styles.css</code>.</li>
         </ul>
       </section>
 

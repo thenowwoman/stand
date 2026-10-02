@@ -37,6 +37,10 @@
   --toggle-bg: #f1f5f9;
   --toggle-border: #cbd5e1;
   --toggle-text: #334155;
+  --hero-code-bg: #e0e7ff;
+  --hero-code-text: #3730a3;
+  --hero-accent: #7c3aed;
+  --journey-bg: #f8fafc;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -88,6 +92,10 @@
     --toggle-bg: #1e293b;
     --toggle-border: #475569;
     --toggle-text: #e2e8f0;
+    --hero-code-bg: #282448;
+    --hero-code-text: #e0e7ff;
+    --hero-accent: #c4b5fd;
+    --journey-bg: #152238;
   }
 }
 
@@ -130,10 +138,18 @@
   --toggle-bg: #1e293b;
   --toggle-border: #475569;
   --toggle-text: #e2e8f0;
+  --hero-code-bg: #282448;
+  --hero-code-text: #e0e7ff;
+  --hero-accent: #c4b5fd;
+  --journey-bg: #152238;
 }
 
 [data-theme='light'] {
   color-scheme: light;
+  --hero-code-bg: #e0e7ff;
+  --hero-code-text: #3730a3;
+  --hero-accent: #7c3aed;
+  --journey-bg: #f8fafc;
 }
 
 * { box-sizing: border-box; }
@@ -187,10 +203,108 @@ button, textarea, a {
   color: var(--brand-blue);
 }
 
-h1 {
+.welcome-opening {
+  margin: 12px 0 28px;
+  padding: clamp(18px, 4vw, 30px);
+  overflow: hidden;
+  border: 1px solid var(--profile-border);
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 100% 0%, var(--profile-bg-end), transparent 55%),
+    linear-gradient(135deg, var(--profile-bg-start), var(--panel-bg));
+}
+
+.welcome-copy {
+  animation: welcome-rise 650ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+@keyframes welcome-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.code-whisper {
+  width: fit-content;
+  margin: 0 0 14px;
+  padding: 6px 10px;
+  border: 1px solid var(--profile-border);
+  border-radius: 9px;
+  background: var(--hero-code-bg);
+  color: var(--hero-code-text);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.code-whisper > span:first-child,
+.code-whisper > span:nth-child(2) {
+  color: var(--hero-accent);
+}
+
+.code-prompt {
+  margin-left: 5px;
+  color: var(--muted) !important;
+  font-weight: 500;
+}
+
+.welcome-opening h1 {
+  max-width: 15ch;
+  margin: 0;
+  font-size: clamp(2rem, 5.5vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.welcome-opening h1 span {
+  color: var(--hero-accent);
+}
+
+.welcome-subtitle {
+  max-width: 38rem;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: clamp(0.98rem, 2.4vw, 1.12rem);
+}
+
+.journey-map {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.journey-step {
+  display: grid;
+  flex: 1;
+  min-height: 60px;
+  align-content: center;
+  gap: 2px;
+  padding: 9px 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: var(--journey-bg);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.journey-step code {
+  color: var(--hero-accent);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: 0.7rem;
+}
+
+.journey-arrow {
+  color: var(--hero-accent);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.prompt-heading {
   margin: 0 0 18px;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.1;
+  font-size: clamp(1.35rem, 3.5vw, 1.8rem);
+  line-height: 1.2;
 }
 
 .prompt-form {
@@ -241,6 +355,37 @@ textarea::placeholder { color: var(--subtle); }
 .prompt-actions {
   display: grid;
   gap: 10px;
+}
+
+.voice-button {
+  justify-self: start;
+  min-height: 44px;
+  border: 1px solid var(--toggle-border);
+  background: var(--toggle-bg);
+  color: var(--toggle-text);
+  box-shadow: none;
+}
+
+.voice-button:hover:not(:disabled) {
+  box-shadow: var(--button-shadow);
+  filter: none;
+}
+
+.voice-button[aria-pressed='true'] {
+  border-color: var(--profile-border);
+  background: var(--profile-bg-start);
+  color: var(--text);
+}
+
+.voice-button span {
+  margin-right: 7px;
+  color: var(--hero-accent);
+}
+
+.voice-note {
+  margin: -8px 0 0;
+  color: var(--subtle);
+  font-size: 0.84rem;
 }
 
 .question-start-button {
@@ -423,6 +568,14 @@ button:disabled {
   line-height: 1.2;
 }
 
+.read-aloud-button {
+  margin-top: 16px;
+}
+
+.read-aloud-button + .voice-note {
+  margin-top: 8px;
+}
+
 .profile-skills {
   display: flex;
   flex-wrap: wrap;
@@ -507,6 +660,13 @@ button:disabled {
   }
   .profile-skills { gap: 10px; margin-top: 22px; }
   .profile-card .profile-note { margin-top: 20px; }
+  .journey-map { gap: 6px; }
+  .journey-step {
+    min-height: 56px;
+    padding: 8px 7px;
+    font-size: 0.74rem;
+  }
+  .journey-arrow { font-size: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

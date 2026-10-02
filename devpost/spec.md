@@ -15,8 +15,8 @@ This shape is chosen because it proves the product idea quickly without adding a
 ## The Core Journey Through the System
 PRD ref: `prd.md > The Core Journey`.
 
-1. The user opens the app and sees a welcome screen with one prompt and sample text ideas.
-2. They type a short description of their skills or business help, or choose “Not sure what to write? Ask me questions.”
+1. The user opens the app and sees a warm, code-inspired welcome and a small diagram showing work becoming skills and offers.
+2. They type a short description of their skills or business help, optionally dictate it with browser speech recognition, or choose “Not sure what to write? Ask me questions.”
 3. If the input is short or vague, the frontend sends the original description and any earlier answers to the follow-up endpoint.
 4. The endpoint calls the model for one concise, warm question at a time. The user answers in a separate field; the app asks two questions and may ask a third if useful.
 5. The frontend combines the original description and answers and sends them to the profile endpoint. If follow-up generation fails, the client skips the questions and uses the existing keyword-based fallback.
@@ -26,6 +26,7 @@ PRD ref: `prd.md > The Core Journey`.
 9. The app creates a one-page profile preview and shows an opportunity list with explanation text.
 10. The user can screenshot or share the profile, or click through to a suggested opportunity.
 11. The app persists the profile and any in-progress follow-up answers in browser localStorage so the user can return without sign-up.
+12. The user may ask the browser to read the generated bio aloud; speech starts only after an explicit action and is not sent to the server.
 
 ## Stack
 - Frontend: React + Vite + TypeScript
@@ -77,7 +78,7 @@ The styling is deliberately simple so the build stays focused on the proof of co
 ## Components
 
 ### WelcomePrompt
-Serves as the landing screen. It presents the app’s purpose, asks for a brief description of the user’s work, and includes sample prompts.
+Serves as the landing screen. It presents the app’s purpose in a code-inspired visual, shows the work-to-skills-to-offer diagram, asks for a brief description of the user’s work, and offers browser-supported optional voice typing.
 PRD ref: `prd.md > Screens and Layout`, `prd.md > Features and Behavior > Skill Discovery`.
 
 ### SkillReview
@@ -89,7 +90,7 @@ Transforms the approved skills into 2–3 service packages with price suggestion
 PRD ref: `prd.md > Features and Behavior > Service Packaging`.
 
 ### ProfilePreview
-Displays the one-page client-ready profile with name, bio, service list, pricing, and proof of work summary.
+Displays the one-page client-ready profile with name, bio, service list, pricing, and proof of work summary. It offers optional browser read-aloud for the bio.
 PRD ref: `prd.md > Features and Behavior > Professional Profile Generation`.
 
 ### OpportunityPanel
@@ -168,6 +169,11 @@ This app depends on a small number of external items:
   - Required inputs: deployment config and environment variables
   - Docs: hosting provider docs for static + function deployment
 
+- Optional browser speech features
+  - Purpose: let the user dictate the prompt or hear the generated bio
+  - Inputs remain in the browser; no audio is sent to Stand's API
+  - Availability and voice quality depend on the user's browser and device; the typed flow remains available without them
+
 - No database or auth provider required for the proof of concept.
 
 ## Important Failure Modes
@@ -176,6 +182,7 @@ This app depends on a small number of external items:
 - **The user’s pricing looks unrealistic** → price suggestions are clearly labeled as editable and intended as starting points.
 - **The environment lacks a working API key during a local run** → the app falls back to seeded sample data so the UI can still be tested and recorded.
 - **The app is opened on a slow connection** → the flow uses one compact page and minimal network requests, reducing friction.
+- **Browser speech is unsupported, denied, or interrupted** → the app keeps the typed profile flow available and shows a brief, friendly inline explanation or status message.
 
 ## What Was Simplified and Why
 - **No database** instead of stored user accounts — because the proof of concept is about proving the value of the profile-building flow, not about account management.
