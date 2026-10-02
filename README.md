@@ -23,7 +23,7 @@ This starts:
 - the Vite frontend at `http://localhost:5173`
 - the local API server at `http://localhost:3001`
 
-The frontend calls `/api/profile`; the Vite dev server proxies that request to the local API server so the workflow works during local development.
+The frontend calls `/api/profile` for profile generation and `/api/follow-up` for the optional clarification questions. The Vite dev server proxies both routes to the local API server so the workflow works during local development.
 
 ## Vercel deployment
 
@@ -36,7 +36,7 @@ The frontend calls `/api/profile`; the Vite dev server proxies that request to t
 6. Set the project root/build config as needed for a Vite app, and use the default `dist` output directory.
 7. Deploy.
 
-The deployed app uses the Vercel serverless route at `/api/profile`.
+The deployed app uses Vercel serverless routes at `/api/profile` and `/api/follow-up`.
 
 ## Security note
 
