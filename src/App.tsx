@@ -495,7 +495,7 @@ function App() {
         </div>
         <section className="welcome-opening" aria-labelledby="welcome-title">
           <div className="welcome-copy">
-            <p className="code-whisper"><span aria-hidden="true">&lt;</span>stand.exe<span aria-hidden="true"> /&gt;</span> <span className="code-prompt">// your next step</span></p>
+            <p className="code-whisper"><span aria-hidden="true">&lt;</span>stand<span aria-hidden="true"> /&gt;</span> <span className="code-prompt">// start here</span></p>
             <h1 id="welcome-title">Your skills already have <span>value.</span></h1>
             <p className="welcome-subtitle">Let’s give the work you already do a voice, a shape, and a fair starting point.</p>
           </div>

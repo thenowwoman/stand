@@ -37,9 +37,9 @@
   --toggle-bg: #f1f5f9;
   --toggle-border: #cbd5e1;
   --toggle-text: #334155;
-  --hero-code-bg: #e0e7ff;
-  --hero-code-text: #3730a3;
-  --hero-accent: #7c3aed;
+  --hero-code-bg: #dbeafe;
+  --hero-code-text: #1e3a8a;
+  --hero-accent: #5b21b6;
   --journey-bg: #f8fafc;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
@@ -92,8 +92,8 @@
     --toggle-bg: #1e293b;
     --toggle-border: #475569;
     --toggle-text: #e2e8f0;
-    --hero-code-bg: #282448;
-    --hero-code-text: #e0e7ff;
+    --hero-code-bg: #1e293b;
+    --hero-code-text: #f1f5f9;
     --hero-accent: #c4b5fd;
     --journey-bg: #152238;
   }
@@ -138,17 +138,17 @@
   --toggle-bg: #1e293b;
   --toggle-border: #475569;
   --toggle-text: #e2e8f0;
-  --hero-code-bg: #282448;
-  --hero-code-text: #e0e7ff;
+  --hero-code-bg: #1e293b;
+  --hero-code-text: #f1f5f9;
   --hero-accent: #c4b5fd;
   --journey-bg: #152238;
 }
 
 [data-theme='light'] {
   color-scheme: light;
-  --hero-code-bg: #e0e7ff;
-  --hero-code-text: #3730a3;
-  --hero-accent: #7c3aed;
+  --hero-code-bg: #dbeafe;
+  --hero-code-text: #1e3a8a;
+  --hero-accent: #5b21b6;
   --journey-bg: #f8fafc;
 }
 
@@ -232,7 +232,7 @@ button, textarea, a {
   background: var(--hero-code-bg);
   color: var(--hero-code-text);
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
